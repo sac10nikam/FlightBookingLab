@@ -1,0 +1,9 @@
+#Flight Booking Lab release
+1)Used Java 1.5, Eclipse Mars IDE
+2)Plugins Used : Junit plugin under Eclipse, Code Smells plugin named as JDeodrant,
+                  Eclipse Code Analyser, PMD, Checkstyle plugins
+3)Data Structures/Algorithms - Dijikstra Algorithm
+4)Funtionality - Finding shortest route between cities/nodes/vertexes
+5)Document - FlightBookingLab.docx
+6)Codebase - github
+                    
