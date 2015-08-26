@@ -1,12 +1,18 @@
 package com.ideas.fbl.exception;
 
+import java.io.Serializable;
+
 /**
  * Route Finder exception class.
  * @author sachin_nikam
  *
  */
-public class RouteFinderException extends Exception {
+public class RouteFinderException extends RuntimeException implements Serializable {
 	
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = 4147165202670184905L;
 	/**
 	 * Exception message
 	 */

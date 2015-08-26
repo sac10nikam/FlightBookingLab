@@ -137,7 +137,6 @@ public class Vertex implements Comparable<Vertex> {
 	 * specified object. 
 	 * 
 	 */
-	@Override
 	public int compareTo(Vertex other) {
 		return Double.compare(sourceDistance, other.sourceDistance);
 	}
