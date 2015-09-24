@@ -19,14 +19,8 @@ import com.ideas.fbl.service.RouteFinder;
 
 /**
  * <p>
- * Compute shortest paths in a graph. Used to find of out shortest paths between
- * cities based on number of flights/distance.
- * 
- * We have used Dijikstra algorithm to compute paths. Dijikstra partitions all
- * nodes into two distinct sets. Unsettled and settled. Initially all nodes are
- * in the unsettled sets, e.g. they must be still evaluated. A node is moved to
- * the settled set if a shortest path from the source to this node has been
- * found.
+ * Compute shortest paths in a graph i.e. shortest paths between cities based on 
+ * number of flights/distance. Implementation of {@link RouteFinder} service.</p>
  * </p>
  * 
  * @author sachin_nikam
@@ -34,10 +28,12 @@ import com.ideas.fbl.service.RouteFinder;
  */
 public class RouteFinderImpl implements RouteFinder {
 
+	private RouteFinderDistanceUtil finderDistanceUtil = new RouteFinderDistanceUtil();
+
 	/**
 	 * Log4j Logger object.
 	 */
-	public final static Logger logger = Logger.getLogger(RouteFinderImpl.class);
+	public static final Logger LOGGER = Logger.getLogger(RouteFinderImpl.class);
 
 	/**
 	 * List of nodes/vertexes/cities.
@@ -63,8 +59,6 @@ public class RouteFinderImpl implements RouteFinder {
 	 * Map of adjacent nodes
 	 */
 	private Map<Vertex, Vertex> predecessors;
-	private Map<Vertex, Integer> distance;
-	
 	/**
 	 * Constructor with parameter - {@link Graph}
 	 * 
@@ -72,11 +66,11 @@ public class RouteFinderImpl implements RouteFinder {
 	 *            The {@link Graph} object
 	 */
 	public RouteFinderImpl(final Graph graph) {
-		logger.debug("Constructor start");
+		LOGGER.debug("Constructor start");
 		// create a copy of the array so that we can operate on this array
 		this.nodes = new ArrayList<Vertex>(graph.getVertexes());
 		this.edges = new ArrayList<Edge>(graph.getEdges());
-		logger.debug("Constructor end");
+		LOGGER.debug("Constructor end");
 	}
 
 	/**
@@ -86,20 +80,20 @@ public class RouteFinderImpl implements RouteFinder {
 	 *            The {@link Vertex} object
 	 */
 	public void computePaths(final Vertex source) throws RouteFinderException {
-		logger.debug("computePaths start");
+		LOGGER.debug("computePaths start");
 		settledNodes = new HashSet<Vertex>();
 		unSettledNodes = new HashSet<Vertex>();
-		distance = new HashMap<Vertex, Integer>();
+		finderDistanceUtil.setDistance(new HashMap<Vertex, Integer>());
 		predecessors = new HashMap<Vertex, Vertex>();
-		distance.put(source, 0);
+		finderDistanceUtil.getDistance().put(source, 0);
 		unSettledNodes.add(source);
 		while (unSettledNodes.size() > 0) {
-			final Vertex node = getMinimum(unSettledNodes);
+			final Vertex node = finderDistanceUtil.getMinimum(unSettledNodes);
 			settledNodes.add(node);
 			unSettledNodes.remove(node);
 			findMinimalDistances(node);
 		}
-		logger.debug("computePaths end");
+		LOGGER.debug("computePaths end");
 	}
 
 	/**
@@ -116,7 +110,7 @@ public class RouteFinderImpl implements RouteFinder {
 			}
 		}
 		final String errorMessage = "This case should not happen. There should some egdes between nodes";
-		logger.info(errorMessage);
+		LOGGER.info(errorMessage);
 		throw new RouteFinderException("No edges :" + errorMessage);
 	}
 
@@ -146,20 +140,20 @@ public class RouteFinderImpl implements RouteFinder {
 	 * @return The path {@link LinkedList}
 	 */
 	public LinkedList<Vertex> getShortestRouteTo(final Vertex target) throws RouteFinderException {
-		final LinkedList<Vertex> path = new LinkedList<Vertex>();
+		final LinkedList<Vertex> paths = new LinkedList<Vertex>();
 		Vertex step = target;
 		// check if a path exists
 		if (predecessors.get(step) == null) {
 			return null;
 		}
-		path.add(step);
+		paths.add(step);
 		while (predecessors.get(step) != null) {
 			step = predecessors.get(step);
-			path.add(step);
+			paths.add(step);
 		}
 		// Put it into the correct order
-		Collections.reverse(path);
-		return path;
+		Collections.reverse(paths);
+		return paths;
 	}
 
 	/**
@@ -178,42 +172,19 @@ public class RouteFinderImpl implements RouteFinder {
 	}
 	
 	private void findMinimalDistances(final Vertex node) {
-		logger.debug("findMinimalDistances start");
+		LOGGER.debug("findMinimalDistances start");
 		try {
 			final List<Vertex> adjacentNodes = getNeighbors(node);
 			for (Vertex target : adjacentNodes) {
-				if (getShortestDistance(target) > getShortestDistance(node) + getDistanceBetweenNodes(node, target)) {
-					distance.put(target, getShortestDistance(node) + getDistanceBetweenNodes(node, target));
+				if (finderDistanceUtil.getShortestDistance(target) > finderDistanceUtil.getShortestDistance(node) + getDistanceBetweenNodes(node, target)) {
+					finderDistanceUtil.getDistance().put(target, finderDistanceUtil.getShortestDistance(node) + getDistanceBetweenNodes(node, target));
 					predecessors.put(target, node);
 					unSettledNodes.add(target);
 				}
 			}
 		} catch (RouteFinderException ex) {
-			logger.error("Error in finding minimal distances: " + ex.getMessage());
+			LOGGER.error("Error in finding minimal distances: " + ex.getMessage());
 		}
-		logger.debug("findMinimalDistances end");
-	}
-
-	private Vertex getMinimum(Set<Vertex> vertexes) {
-		Vertex minimum = null;
-		for (Vertex vertex : vertexes) {
-			if (minimum == null) {
-				minimum = vertex;
-			} else {
-				if (getShortestDistance(vertex) < getShortestDistance(minimum)) {
-					minimum = vertex;
-				}
-			}
-		}
-		return minimum;
-	}
-
-	private int getShortestDistance(Vertex destination) {
-		Integer d = distance.get(destination);
-		if (d == null) {
-			return Integer.MAX_VALUE;
-		} else {
-			return d;
-		}
+		LOGGER.debug("findMinimalDistances end");
 	}
 }

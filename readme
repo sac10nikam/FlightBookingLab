@@ -6,4 +6,4 @@
 4)Funtionality - Finding shortest route between cities/nodes/vertexes
 5)Document - FlightBookingLab.docx
 6)Codebase - github
-                    
+7)Logging - Used log4j. Set log4j log file path under log4j.properties 
